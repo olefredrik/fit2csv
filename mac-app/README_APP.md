@@ -1,69 +1,139 @@
-# macOS Automator App – Build Instructions (Updated)
+# fit2csv macOS App – Build Instructions
 
-This guide explains how to build the standalone macOS Automator application that wraps the `fit2csv_batch.py` script and includes the custom duotone runner icon.
+This document explains how to build the macOS `.app` version of **fit2csv**, including how to embed the Python script and bundle all required Python dependencies so the app works out-of-the-box for users (no Terminal, no pip install needed).
 
-It covers:
-
-- Creating the Automator .app
-- Embedding the Python script
-- Adding and configuring the custom `.icns` icon
-- Handling macOS icon caching
-- Troubleshooting common issues
+The goal:
+A **fully self-contained macOS app** that can convert `.FIT` → `.CSV` without requiring users to install anything.
 
 ---
 
-# 📁 Repository Structure (relevant parts)
+# 📦 1. Overview of the App Structure
+
+The final app bundle should look like this:
 
 ```
-mac-app/
-    README_APP.md
-    icon.icns                 # Final macOS application icon
-src/
-    fit2csv_batch.py          # Python conversion script
+fit2csv.app
+  Contents/
+    Info.plist
+    MacOS/
+    Resources/
+      fit2csv_batch.py
+      python_deps/
+        fitdecode/
+        fitdecode-0.11.0.dist-info/
+        bin/
+      icon.icns
+```
+
+- `fit2csv_batch.py` → The real converter logic
+- `python_deps/` → All Python packages bundled locally
+- `icon.icns` → Custom app icon
+- `Info.plist` → Metadata and icon settings
+- Automator → Provides a simple macOS GUI wrapper
+
+---
+
+# 🧰 2. Build Process Overview
+
+To create a fresh bundled macOS app:
+
+1. Open/modify the Automator workflow
+2. **Save** the app (this always wipes the Resources folder)
+3. Re-add:
+   - `fit2csv_batch.py`
+   - `python_deps/`
+   - `icon.icns`
+4. Update AppleScript to use the bundled Python dependencies
+5. Test the app on a clean system
+
+---
+
+# 🧩 3. Preparing Python Dependencies (fitdecode)
+
+These dependencies must **NOT** be committed to Git.  
+They are build artefacts and belong only inside the final `.app` bundle.
+
+Install dependencies locally using:
+
+```bash
+mkdir -p python_deps
+python3 -m pip install --target ./python_deps fitdecode==0.11.0
+```
+
+This creates:
+
+```
+python_deps/
+  bin/
+  fitdecode/
+  fitdecode-0.11.0.dist-info/
+```
+
+Later, copy this folder into:
+
+```
+fit2csv.app/Contents/Resources/python_deps/
 ```
 
 ---
 
-# 🧱 1. Create a New Automator Application
+# 🖼 4. Adding the App Icon
 
-1. Open **Automator.app**
-2. Select **New Document**
-3. Choose **Application**
-4. In the search field, locate **Run AppleScript**
-5. Drag **Run AppleScript** into the workflow
-6. Replace the default script with:
+Place your `.icns` file here:
+
+```
+fit2csv.app/Contents/Resources/icon.icns
+```
+
+Add/update `Info.plist`:
+
+```xml
+<key>CFBundleIconFile</key>
+<string>icon.icns</string>
+```
+
+If the icon does not update:
+
+```bash
+killall Finder
+killall Dock
+```
+
+---
+
+# 📝 5. Updating the AppleScript
+
+After saving in Automator, ensure Run AppleScript contains:
 
 ```applescript
 on run {input, parameters}
 
-    -- Ask user to select the folder containing FIT files
+    -- Select folder containing FIT files
     set inputFolder to choose folder with prompt "Select the folder that contains your FIT files"
 
-    -- Ask user to select output folder; if cancelled, use default csv_out folder
+    -- Select output folder (fallback to default)
     try
         set outputFolder to choose folder with prompt "Select output folder for CSV files"
         set useDefaultOutput to false
     on error
-        -- User cancelled the dialog, so we use default output inside input folder
         set useDefaultOutput to true
     end try
 
-    -- Convert input folder to POSIX path (string)
     set inputPath to POSIX path of inputFolder
 
     if useDefaultOutput then
-        -- Default output folder inside input folder
         set outputPath to inputPath & "csv_out/"
     else
         set outputPath to POSIX path of outputFolder
     end if
 
-    -- Determine the app's path and locate the embedded Python script
+    -- Embedded script + dependencies
     set appPath to POSIX path of (path to me)
     set scriptPath to appPath & "Contents/Resources/fit2csv_batch.py"
+    set depsPath to appPath & "Contents/Resources/python_deps"
 
-    -- Build shell command to run Python script
-    set cmd to "/usr/bin/env python3 " & quoted form of scriptPath & " " & quoted form of inputPath & " --out " & quoted form of outputPath
+    -- Build command using bundled dependencies
+    set cmd to "PYTHONPATH=" & quoted form of depsPath & " /usr/bin/env python3 " & quoted form of scriptPath & " " & quoted form of inputPath & " --out " & quoted form of outputPath
 
     try
         do shell script cmd
@@ -72,183 +142,81 @@ on run {input, parameters}
         return input
     end try
 
-    -- macOS notification
     display notification "Conversion finished" with title "FIT to CSV"
-
-    -- Open output folder
     do shell script "open " & quoted form of outputPath
 
     return input
 end run
 ```
 
-7. Save the app, for example:
+---
+
+# 📥 6. Copy Resources AFTER Saving the Automator App
+
+🚨 Important:  
+Automator **deletes the Resources folder every time you save the app**.
+
+Correct order:
+
+### 1. Open app in Automator
+
+### 2. Modify AppleScript
+
+### 3. Save the app
+
+### 4. Re-add manually:
 
 ```
-fit2csv.app
+fit2csv_batch.py
+python_deps/
+icon.icns
 ```
 
 ---
 
-# 📦 2. Embed the Python Script
+# 🧪 7. Testing the Self-Contained App
 
-1. Right-click the saved app → **Show Package Contents**
-2. Navigate to:
+To ensure bundling works:
 
-```
-Contents/Resources/
-```
+1. Create a new macOS user
+2. Log in
+3. Make sure no `pip install fitdecode` was done
+4. Launch the app
+5. Convert some `.FIT` files
 
-3. Copy:
-
-```
-src/fit2csv_batch.py
-```
-
-into that folder.
-
-Your structure should look like:
-
-```
-fit2csv.app/
-    Contents/
-        Resources/
-            fit2csv_batch.py
-```
-
-This makes the app fully standalone.
+If it works — bundling is correct.
 
 ---
 
-# 🎨 3. Add the Custom App Icon
+# 🚀 8. Packaging a Release
 
-The repository contains:
+After confirming everything:
 
-```
-mac-app/icon.icns
-```
-
-To apply it:
-
-1. Place `icon.icns` into:
+1. Right-click `fit2csv.app` → **Compress**
+2. Rename to:
 
 ```
-fit2csv.app/Contents/Resources/icon.icns
+fit2csv-macos-v0.4.0.zip
 ```
 
-2. Open:
-
-```
-fit2csv.app/Contents/Info.plist
-```
-
-3. Ensure:
-
-```xml
-<key>CFBundleIconFile</key>
-<string>icon.icns</string>
-```
-
-## ⚠️ Important: Handle CFBundleIconName
-
-If this key exists:
-
-```xml
-<key>CFBundleIconName</key>
-<string>ApplicationStub</string>
-```
-
-Then macOS will ignore your `icon.icns` and use the Automator default icon.
-
-You must either:
-
-### Option A (Recommended) — Change value:
-
-```xml
-<key>CFBundleIconName</key>
-<string>icon</string>
-```
-
-### Option B — Remove the key entirely
-
-Both will allow macOS to use your custom icon.
+3. Upload to GitHub Releases
 
 ---
 
-# 🧹 4. Remove “Get Info” Icon Overrides
+# ❌ 9. What NOT to Commit to Git
 
-If you ever manually copied an icon onto the app using **Get Info**, macOS _overrides_ the bundle icon.
-
-To remove it:
-
-1. Right-click the app → **Get Info**
-2. Click the small icon top-left
-3. Press **Delete**
-4. Close the window
-
----
-
-# 🔄 5. Refresh macOS Icon Cache
-
-macOS heavily caches icons.
-
-If your icon does not update immediately, run:
-
-```bash
-killall Finder
-killall Dock
-```
-
-Or log out and back in.
-
----
-
-# 🧪 6. Test the App
-
-- Double-click the app
-- Select input folder with `.FIT` files
-- Select (or skip) output folder
-- Verify:
-  - Conversion works
-  - Output folder opens
-  - Notification appears
-  - Custom icon is visible in Finder
-
----
-
-# 📤 7. Distribute the Application
-
-1. Right-click `fit2csv.app` → **Compress "fit2csv.app"**
-2. Upload the ZIP as a Release asset on GitHub
-3. Recommended naming:
+Add to `.gitignore`:
 
 ```
-fit2csv-macos-vX.Y.Z.zip
+python_deps/
+*.app
+*.zip
 ```
+
+These are build artefacts only.
 
 ---
 
-# 🛠 Requirements for End Users
+# 🎉 Done
 
-They must have:
-
-- Python 3 installed
-- `fitdecode` installed:
-
-```bash
-pip install fitdecode
-```
-
----
-
-# ✔️ Done!
-
-You now have a fully configured macOS GUI app with:
-
-- embedded Python logic
-- folder selection
-- notifications
-- automatic output folder creation
-- a polished custom icon
-
-Perfect for distributing in GitHub Releases.
+Your macOS app is now fully self-contained and requires **no Python setup** from users.
