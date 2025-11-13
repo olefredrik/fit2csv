@@ -10,8 +10,22 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ### Ideas / Exploration
 
-- Explore improvements to the macOS GUI wrapper (more detailed UI, optional settings, better affordances).
-- Potential future work will be added here as it becomes more concrete.
+- Exploring improvements to the macOS GUI wrapper (more detailed UI, optional settings, enhanced affordances).
+- Additional internal cleanup or refactoring to improve maintainability.
+
+---
+
+## [0.3.0] – 2025-11-13
+
+### Improved
+
+- Translated the entire Python batch converter script (`fit2csv_batch.py`) from Norwegian to English for consistency across the repository.
+- Cleaned up comments, improved naming consistency, and added clarifying documentation inside the script.
+- No functional changes were introduced; conversion behavior remains identical.
+
+### Diff
+
+[`0.2.0...0.3.0`](https://github.com/olefredrik/fit2csv/compare/v0.2.0...v0.3.0)
 
 ---
 
