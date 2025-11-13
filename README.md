@@ -1,5 +1,15 @@
 # fit2csv
 
+<p align="left">
+  <a href="https://github.com/olefredrik/fit2csv/releases/latest">
+    <img src="https://img.shields.io/github/v/release/olefredrik/fit2csv?label=Latest%20Release&color=2ea44f" />
+  </a>
+  <img src="https://img.shields.io/badge/Platform-macOS-blue" />
+  <img src="https://img.shields.io/badge/License-MIT-yellow" />
+  <img src="https://img.shields.io/github/downloads/olefredrik/fit2csv/total?label=Downloads" />
+  <img src="https://img.shields.io/badge/Python-3.x-blue" />
+</p>
+
 A simple open-source tool for batch converting `.FIT` files (Garmin, Polar, Wahoo, etc.) into `.CSV` files.
 
 This project contains:
@@ -27,17 +37,19 @@ The goal is to provide a minimal, reliable, and flexible tool for anyone who wan
 
 ## 📦 Repository Structure
 
+```text
 fit2csv/
 │
 ├── src/
-│ └── fit2csv_batch.py # Main Python conversion script
+│   └── fit2csv_batch.py          # Main Python conversion script
 │
 ├── mac-app/
-│ └── README_APP.md # Instructions to build the Automator app
+│   └── README_APP.md             # Instructions to build the Automator app
 │
 ├── .gitignore
 ├── LICENSE
 └── README.md
+```
 
 ---
 
@@ -45,7 +57,9 @@ fit2csv/
 
 The main script lives in:
 
+```
 src/fit2csv_batch.py
+```
 
 It expects:
 
@@ -54,13 +68,17 @@ It expects:
 
 ### Example usage:
 
+```bash
 python3 src/fit2csv_batch.py /path/to/fit-files --out /path/to/output
+```
 
 ### Requirements
 
 Install dependencies:
 
+```bash
 pip install fitdecode
+```
 
 ---
 
@@ -76,7 +94,9 @@ The Automator application wraps the Python script and allows you to:
 
 See:
 
+```
 mac-app/README_APP.md
+```
 
 This explains how to:
 
@@ -104,7 +124,7 @@ Pull requests are welcome!
 ## 📝 License
 
 This project is released under the **MIT License**.  
-See `LICENSE` for full text.
+See [`LICENSE`](LICENSE) for full text.
 
 ---
 
