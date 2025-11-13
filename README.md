@@ -1,140 +1,115 @@
 # fit2csv
 
-<p align="left">
-  <a href="https://github.com/olefredrik/fit2csv/releases/latest">
-    <img src="https://img.shields.io/github/v/release/olefredrik/fit2csv?label=Latest%20Release&color=2ea44f" />
-  </a>
-  <img src="https://img.shields.io/badge/Platform-macOS-blue" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow" />
-  <img src="https://img.shields.io/github/downloads/olefredrik/fit2csv/total?label=Downloads" />
-  <img src="https://img.shields.io/badge/Python-3.x-blue" />
-</p>
+Convert multiple `.FIT` files into `.CSV` with a simple macOS GUI wrapper and a clean Python batch converter.
 
-A simple open-source tool for batch converting `.FIT` files (Garmin, Polar, Wahoo, etc.) into `.CSV` files.
-
-This project contains:
-
-- A **Python script** (`fit2csv_batch.py`) that performs the actual FIT → CSV conversion
-- A **macOS Automator application** (optional) that provides a simple GUI and wraps the Python script
-- Documentation on how to build the macOS app
-
-The goal is to provide a minimal, reliable, and flexible tool for anyone who wants to work with their own training data.
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+![Platform](https://img.shields.io/badge/platform-macOS-blue)
+![Status](https://img.shields.io/badge/status-active-brightgreen)
 
 ---
 
-## ✨ Features
+## 📚 Background
 
-- Convert entire folders of `.fit` files to `.csv`
-- Preserve original filenames
-- Output folder selection (or automatic `csv_out` folder)
-- macOS Automator app:
-  - Choose input/output folders via GUI
-  - Shows a “Conversion finished” notification
-  - Opens output folder automatically
-  - Embeds the Python script inside the `.app` bundle
+The idea for this project came from my own training routine. Over the years, my Apple Watch has logged more than 300 workouts, which I explore using the _HealthFit_ app. When I started playing with the idea of building an AI-based personal coach, I realized I needed all my previous workouts in a clean CSV format.
+
+It turned out that no free tool existed for converting large batches of `.FIT` files to `.CSV`.  
+So… I built one. With some help from AI.
+
+It’s simple, but it works. And if it helps others too, that’s even better.
 
 ---
 
-## 📦 Repository Structure
+## 🚀 Features
 
-```text
+- Batch convert `.FIT` → `.CSV`
+- macOS GUI wrapper using Automator
+- Automatic output folder creation (`csv_out`)
+- Notifications on completion
+- Opens output folder automatically
+- Custom duotone runner icon
+- Fully documented build instructions
+
+---
+
+## 📦 Installation (Download App)
+
+Download the latest version here:
+
+👉 **https://github.com/olefredrik/fit2csv/releases/latest**
+
+Unzip, run the app, and select your folders.
+
+---
+
+## 🛠 Building the macOS App Yourself
+
+If you want to build the Automator app locally or modify it:
+
+See:  
+📄 **[`mac-app/README_APP.md`](mac-app/README_APP.md)**
+
+This document explains:
+
+- How to embed the Python script
+- How to apply the custom icon
+- How to update `Info.plist`
+- How to refresh macOS icon cache
+
+---
+
+## 🧩 Python Script (CLI Use)
+
+If you prefer to run the converter directly:
+
+```bash
+pip install fitdecode
+python3 src/fit2csv_batch.py <input_dir> --out <output_dir>
+```
+
+Example:
+
+```bash
+python3 src/fit2csv_batch.py ~/Downloads/FIT --out ~/Desktop/csv
+```
+
+---
+
+## 📁 Repository Structure
+
+```
 fit2csv/
-│
 ├── src/
-│   └── fit2csv_batch.py          # Main Python conversion script
-│
+│   └── fit2csv_batch.py
 ├── mac-app/
-│   └── README_APP.md             # Instructions to build the Automator app
-│
-├── .gitignore
+│   ├── README_APP.md
+│   └── icon.icns
+├── CHANGELOG.md
 ├── LICENSE
 └── README.md
 ```
 
 ---
 
-## 🐍 Python Script
+## 🧭 Roadmap
 
-The main script lives in:
+Planned / exploratory ideas:
 
-```
-src/fit2csv_batch.py
-```
+- Improving the macOS GUI interface
+- Optional settings for output naming
+- Making the Automator wrapper more interactive
 
-It expects:
-
-- an **input folder** containing `.fit` files
-- an **output folder** (created automatically if missing)
-
-### Example usage:
-
-```bash
-python3 src/fit2csv_batch.py /path/to/fit-files --out /path/to/output
-```
-
-### Requirements
-
-Install dependencies:
-
-```bash
-pip install fitdecode
-```
+(See `CHANGELOG.md` for detailed version history.)
 
 ---
 
-## 🍏 macOS Application (optional)
+## 🤝 Contributing
 
-The Automator application wraps the Python script and allows you to:
-
-- Select input folder
-- Select output folder
-- Run the conversion without using Terminal
-
-### Building the macOS app yourself
-
-See:
-
-```
-mac-app/README_APP.md
-```
-
-This explains how to:
-
-- embed `fit2csv_batch.py` inside the `.app`
-- use an AppleScript wrapper to call the Python script
-- build your own standalone `fit2csv.app`
-
-The Automator app **is not stored directly in this repository** (best practice).  
-Instead, you can download prebuilt versions via **GitHub Releases**.
+Contributions are welcome!  
+Feel free to open an issue or a pull request.
 
 ---
 
-## 🛠 Planned improvements
+## 📄 License
 
-- Windows and Linux packaging
-- Optional progress output
-- Native Python GUI version (Tkinter / PyQt)
-- FIT → Parquet support
-- Better error handling and logging
-
-Pull requests are welcome!
-
----
-
-## 📝 License
-
-This project is released under the **MIT License**.  
-See [`LICENSE`](LICENSE) for full text.
-
----
-
-## 👤 Author
-
-Ole Fredrik Lie  
-GitHub: https://github.com/olefredrik
-
----
-
-## 💬 Feedback / Contributions
-
-Pull requests and issues are welcome! If you build something cool on top of this tool — GUI, CLI enhancements, better FIT parsing — please consider contributing it back.
+MIT License.  
+See **[`LICENSE`](LICENSE)** for details.
