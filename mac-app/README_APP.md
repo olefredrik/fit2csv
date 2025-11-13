@@ -1,27 +1,25 @@
-# macOS Automator App – Build Instructions
+# macOS Automator App – Build Instructions (Updated)
 
-This guide explains how to build the standalone macOS Automator application that wraps the `fit2csv_batch.py` script and includes a custom app icon.
+This guide explains how to build the standalone macOS Automator application that wraps the `fit2csv_batch.py` script and includes the custom duotone runner icon.
 
-The Automator app provides:
+It covers:
 
-- A simple macOS GUI for selecting input and output folders
-- Batch conversion of `.FIT` files to `.CSV`
-- Automatic creation of a `csv_out` folder if needed
-- macOS notification on completion
-- Automatic opening of output folder
-- A bundled Python script
-- A custom macOS `.icns` application icon
+- Creating the Automator .app
+- Embedding the Python script
+- Adding and configuring the custom `.icns` icon
+- Handling macOS icon caching
+- Troubleshooting common issues
 
 ---
 
-## 📁 Repository Structure (relevant parts)
+# 📁 Repository Structure (relevant parts)
 
 ```
 mac-app/
     README_APP.md
-    icon.icns             # App icon (ready to use)
+    icon.icns                 # Final macOS application icon
 src/
-    fit2csv_batch.py      # Python conversion script
+    fit2csv_batch.py          # Python conversion script
 ```
 
 ---
@@ -29,11 +27,11 @@ src/
 # 🧱 1. Create a New Automator Application
 
 1. Open **Automator.app**
-2. Choose **New Document**
-3. Select **Application**
-4. In the search field, find **Run AppleScript**
-5. Drag **Run AppleScript** into the workflow area
-6. Delete everything in the AppleScript window and replace it with the script below:
+2. Select **New Document**
+3. Choose **Application**
+4. In the search field, locate **Run AppleScript**
+5. Drag **Run AppleScript** into the workflow
+6. Replace the default script with:
 
 ```applescript
 on run {input, parameters}
@@ -60,7 +58,7 @@ on run {input, parameters}
         set outputPath to POSIX path of outputFolder
     end if
 
-    -- Determine the app's own path and locate the embedded Python script
+    -- Determine the app's path and locate the embedded Python script
     set appPath to POSIX path of (path to me)
     set scriptPath to appPath & "Contents/Resources/fit2csv_batch.py"
 
@@ -84,7 +82,7 @@ on run {input, parameters}
 end run
 ```
 
-7. Save the app, for example as:
+7. Save the app, for example:
 
 ```
 fit2csv.app
@@ -94,7 +92,7 @@ fit2csv.app
 
 # 📦 2. Embed the Python Script
 
-1. Right‑click the newly created app → **Show Package Contents**
+1. Right-click the saved app → **Show Package Contents**
 2. Navigate to:
 
 ```
@@ -107,9 +105,9 @@ Contents/Resources/
 src/fit2csv_batch.py
 ```
 
-into this folder.
+into that folder.
 
-Your structure should now look like:
+Your structure should look like:
 
 ```
 fit2csv.app/
@@ -124,15 +122,15 @@ This makes the app fully standalone.
 
 # 🎨 3. Add the Custom App Icon
 
-The repository includes a ready-made macOS application icon:
+The repository contains:
 
 ```
 mac-app/icon.icns
 ```
 
-To use it:
+To apply it:
 
-1. Copy `icon.icns` into:
+1. Place `icon.icns` into:
 
 ```
 fit2csv.app/Contents/Resources/icon.icns
@@ -144,60 +142,95 @@ fit2csv.app/Contents/Resources/icon.icns
 fit2csv.app/Contents/Info.plist
 ```
 
-3. Add (or update):
+3. Ensure:
 
 ```xml
 <key>CFBundleIconFile</key>
 <string>icon.icns</string>
 ```
 
-4. Save the file.
+## ⚠️ Important: Handle CFBundleIconName
 
-If the icon does not appear right away, refresh Finder:
+If this key exists:
+
+```xml
+<key>CFBundleIconName</key>
+<string>ApplicationStub</string>
+```
+
+Then macOS will ignore your `icon.icns` and use the Automator default icon.
+
+You must either:
+
+### Option A (Recommended) — Change value:
+
+```xml
+<key>CFBundleIconName</key>
+<string>icon</string>
+```
+
+### Option B — Remove the key entirely
+
+Both will allow macOS to use your custom icon.
+
+---
+
+# 🧹 4. Remove “Get Info” Icon Overrides
+
+If you ever manually copied an icon onto the app using **Get Info**, macOS _overrides_ the bundle icon.
+
+To remove it:
+
+1. Right-click the app → **Get Info**
+2. Click the small icon top-left
+3. Press **Delete**
+4. Close the window
+
+---
+
+# 🔄 5. Refresh macOS Icon Cache
+
+macOS heavily caches icons.
+
+If your icon does not update immediately, run:
 
 ```bash
 killall Finder
+killall Dock
 ```
 
-(or simply rename the app temporarily and rename it back).
+Or log out and back in.
 
 ---
 
-# 🚀 4. Test the App
+# 🧪 6. Test the App
 
-Double‑click `fit2csv.app` and verify:
-
-- Folder selection dialogs work
-- Conversion runs correctly
-- Notification appears
-- Output folder opens
-- Icon appears in Finder and Dock
-
-If everything works, the app is ready for packaging.
+- Double-click the app
+- Select input folder with `.FIT` files
+- Select (or skip) output folder
+- Verify:
+  - Conversion works
+  - Output folder opens
+  - Notification appears
+  - Custom icon is visible in Finder
 
 ---
 
-# 📤 5. Distribute the Application
+# 📤 7. Distribute the Application
 
-To ship your app:
-
-1. Right‑click `fit2csv.app` → **Compress**
-2. Upload the resulting ZIP file as a Release asset on GitHub
-3. Name it:
+1. Right-click `fit2csv.app` → **Compress "fit2csv.app"**
+2. Upload the ZIP as a Release asset on GitHub
+3. Recommended naming:
 
 ```
 fit2csv-macos-vX.Y.Z.zip
 ```
 
-(where X.Y.Z is your release version)
-
-Users can now download and run the app without building it manually.
-
 ---
 
-# 🛠 Requirements
+# 🛠 Requirements for End Users
 
-Users must have:
+They must have:
 
 - Python 3 installed
 - `fitdecode` installed:
@@ -208,17 +241,14 @@ pip install fitdecode
 
 ---
 
-# 📝 Notes for Advanced Users
-
-- The `.app` is not committed to the repository  
-  → Keeping binaries out of Git is best practice
-- Instead, releases contain ZIP files of the compiled app
-- Developers cloning the repo can rebuild the app using this guide
-
----
-
 # ✔️ Done!
 
-You now have a full macOS GUI app that bundles the Python converter and uses a custom icon.
+You now have a fully configured macOS GUI app with:
 
-Happy shipping!
+- embedded Python logic
+- folder selection
+- notifications
+- automatic output folder creation
+- a polished custom icon
+
+Perfect for distributing in GitHub Releases.
