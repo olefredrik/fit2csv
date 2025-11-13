@@ -1,46 +1,39 @@
-# macOS Automator App Instructions
+# macOS Automator App – Build Instructions
 
-This document explains how to build the standalone macOS Automator application
-that wraps the `fit2csv_batch.py` script.
+This guide explains how to build the standalone macOS Automator application that wraps the `fit2csv_batch.py` script and includes a custom app icon.
 
 The Automator app provides:
-- GUI folder selection
-- Automatic output folder creation
-- Notification when conversion finishes
-- Automatic opening of the output folder
-- Bundled Python script inside the `.app`
+
+- A simple macOS GUI for selecting input and output folders
+- Batch conversion of `.FIT` files to `.CSV`
+- Automatic creation of a `csv_out` folder if needed
+- macOS notification on completion
+- Automatic opening of output folder
+- A bundled Python script
+- A custom macOS `.icns` application icon
 
 ---
 
-## 📁 Folder Structure
-
-Place the Automator app inside the `mac-app` folder:
+## 📁 Repository Structure (relevant parts)
 
 ```
 mac-app/
     README_APP.md
-    (your .app will NOT be stored in the git repo)
+    icon.icns             # App icon (ready to use)
+src/
+    fit2csv_batch.py      # Python conversion script
 ```
-
-Instead of committing the `.app` package, upload it as a ZIP file in **GitHub Releases**.
 
 ---
 
-## 🛠 How to Build the macOS App
+# 🧱 1. Create a New Automator Application
 
-### 1. Open Automator
-
-- Open **Automator.app**
-- Select **New Document**
-- Choose **Application**
-
-### 2. Add “Run AppleScript”
-
-In Automator:
-- Search for **Run AppleScript**
-- Drag it into the workflow area
-
-Delete everything in the script window and paste the following AppleScript:
+1. Open **Automator.app**
+2. Choose **New Document**
+3. Select **Application**
+4. In the search field, find **Run AppleScript**
+5. Drag **Run AppleScript** into the workflow area
+6. Delete everything in the AppleScript window and replace it with the script below:
 
 ```applescript
 on run {input, parameters}
@@ -53,7 +46,7 @@ on run {input, parameters}
         set outputFolder to choose folder with prompt "Select output folder for CSV files"
         set useDefaultOutput to false
     on error
-        -- User cancelled the dialog, so we use default output under input folder
+        -- User cancelled the dialog, so we use default output inside input folder
         set useDefaultOutput to true
     end try
 
@@ -71,10 +64,9 @@ on run {input, parameters}
     set appPath to POSIX path of (path to me)
     set scriptPath to appPath & "Contents/Resources/fit2csv_batch.py"
 
-    -- Build the shell command to run Python script
+    -- Build shell command to run Python script
     set cmd to "/usr/bin/env python3 " & quoted form of scriptPath & " " & quoted form of inputPath & " --out " & quoted form of outputPath
 
-    -- Run the conversion, with simple error handling
     try
         do shell script cmd
     on error errMsg number errNum
@@ -82,98 +74,151 @@ on run {input, parameters}
         return input
     end try
 
-    -- Show macOS notification after finishing
+    -- macOS notification
     display notification "Conversion finished" with title "FIT to CSV"
 
-    -- Open output folder in Finder using the 'open' command
+    -- Open output folder
     do shell script "open " & quoted form of outputPath
 
     return input
 end run
 ```
 
+7. Save the app, for example as:
+
+```
+fit2csv.app
+```
+
 ---
 
-## 📦 Embed the Python Script Inside the `.app`
+# 📦 2. Embed the Python Script
 
-1. Save the Automator application:
-   - **File → Save**
-   - Choose a name, e.g. `fit2csv.app`
+1. Right‑click the newly created app → **Show Package Contents**
+2. Navigate to:
 
-2. Right‑click the new `.app` → **Show Package Contents**
-
-3. Create a folder:
 ```
 Contents/Resources/
 ```
 
-4. Copy the Python script:
+3. Copy:
+
 ```
 src/fit2csv_batch.py
 ```
 
-Into:
+into this folder.
+
+Your structure should now look like:
 
 ```
-fit2csv.app/Contents/Resources/fit2csv_batch.py
+fit2csv.app/
+    Contents/
+        Resources/
+            fit2csv_batch.py
 ```
 
-The app will now work *stand‑alone*.
+This makes the app fully standalone.
 
 ---
 
-## 🚀 Running the App
+# 🎨 3. Add the Custom App Icon
 
-Double-click the app:
+The repository includes a ready-made macOS application icon:
 
-1. Select the folder containing `.fit` files  
-2. Select output folder  
-   - or press “Cancel” to auto‑use `csv_out`  
-3. Wait for “Conversion finished” notification  
-4. Output folder opens automatically
+```
+mac-app/icon.icns
+```
+
+To use it:
+
+1. Copy `icon.icns` into:
+
+```
+fit2csv.app/Contents/Resources/icon.icns
+```
+
+2. Open:
+
+```
+fit2csv.app/Contents/Info.plist
+```
+
+3. Add (or update):
+
+```xml
+<key>CFBundleIconFile</key>
+<string>icon.icns</string>
+```
+
+4. Save the file.
+
+If the icon does not appear right away, refresh Finder:
+
+```bash
+killall Finder
+```
+
+(or simply rename the app temporarily and rename it back).
 
 ---
 
-## 📤 Publishing the App
+# 🚀 4. Test the App
 
-Do **not** commit the `.app` bundle to the Git repository.
+Double‑click `fit2csv.app` and verify:
 
-Instead:
+- Folder selection dialogs work
+- Conversion runs correctly
+- Notification appears
+- Output folder opens
+- Icon appears in Finder and Dock
 
-1. Compress it:
-   - Right‑click → **Compress "fit2csv.app"**
-2. Upload the ZIP file in GitHub under:
-   **Releases → Draft a new Release**
-
-Users can then download the latest `.app` from Releases.
+If everything works, the app is ready for packaging.
 
 ---
 
-## 🧪 Troubleshooting
+# 📤 5. Distribute the Application
 
-### macOS says:
-> “App can’t be opened because the developer cannot be verified”
+To ship your app:
 
-Right‑click the app → **Open** → **Open**  
-This must be done once.
+1. Right‑click `fit2csv.app` → **Compress**
+2. Upload the resulting ZIP file as a Release asset on GitHub
+3. Name it:
 
-### Python not found
-
-Ensure Python 3 is available on the system:
 ```
-python3 --version
+fit2csv-macos-vX.Y.Z.zip
 ```
 
-### Missing dependencies
+(where X.Y.Z is your release version)
 
-Install:
-```
+Users can now download and run the app without building it manually.
+
+---
+
+# 🛠 Requirements
+
+Users must have:
+
+- Python 3 installed
+- `fitdecode` installed:
+
+```bash
 pip install fitdecode
 ```
 
 ---
 
-## ✔️ Done!
+# 📝 Notes for Advanced Users
 
-Your macOS Automator app is now fully portable and ready for open‑source distribution.
+- The `.app` is not committed to the repository  
+  → Keeping binaries out of Git is best practice
+- Instead, releases contain ZIP files of the compiled app
+- Developers cloning the repo can rebuild the app using this guide
 
+---
+
+# ✔️ Done!
+
+You now have a full macOS GUI app that bundles the Python converter and uses a custom icon.
+
+Happy shipping!
