@@ -15,6 +15,19 @@ This project follows [Semantic Versioning](https://semver.org).
 
 ---
 
+## [0.3.1] – 2025-11-13
+
+### Improved
+
+- Bundled `fitdecode` and related Python dependencies inside the macOS app bundle.
+- The macOS app is now self-contained and no longer requires users to run `pip install fitdecode`.
+
+### Diff
+
+[0.3.0...0.3.1](https://github.com/olefredrik/fit2csv/compare/v0.3.0...v0.3.1))
+
+---
+
 ## [0.3.0] – 2025-11-13
 
 ### Improved
