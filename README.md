@@ -113,3 +113,26 @@ Feel free to open an issue or a pull request.
 
 MIT License.  
 See **[`LICENSE`](LICENSE)** for details.
+
+---
+
+## 🎵 Bonus: A Completely Unnecessary Country Ballad
+
+> **“Every good open source project needs documentation.  
+> But only the _great_ ones need a heartfelt country love song.”**
+
+Introducing ...
+
+A _romantic_, _over-the-top_, _full-hearted love song_ about FIT-to-CSV conversion.
+
+Complete with:
+
+- acoustic guitar
+- soft fiddle
+- a man singing his feelings about batch conversion
+- and a surprisingly catchy chorus
+
+🎧 **Listen here:**  
+👉 https://suno.com/s/Lf6rE0SjtJsMApv8
+
+And yes, the song will get stuck in your head. Sorry.
